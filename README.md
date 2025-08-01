@@ -9,7 +9,8 @@ If you want to actually implement any code in this game, please use the **RBLX p
 ## Current Features
 -  Server-sided raycast-based hit detection  
 -  Custom player movement (including dashing)  
--  Laser shot tracers  
+-  Laser shot tracers
+-  Module based code, using a controller (client) service (server) model
 
 ## Upcoming Features
 -  Headshot detection  
