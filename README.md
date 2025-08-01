@@ -10,6 +10,7 @@ If you want to actually implement any code in this game, please use the **RBLX p
 -  Server-sided raycast-based hit detection  
 -  Custom player movement (including dashing)  
 -  Laser shot tracers
+-  Dynamic viewmodels using springs
 -  Module based code, using a controller (client) service (server) model
 
 ## Upcoming Features
