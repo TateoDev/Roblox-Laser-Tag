@@ -5,6 +5,9 @@ local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local controllers = ReplicatedStorage:WaitForChild("Controllers")
+local AudioController = require(controllers.AudioController)
+
 local util = ReplicatedStorage:WaitForChild("Util")
 local GameSettings = require(util.GameSettings)
 local gizmo = require(util.gizmo)
@@ -26,6 +29,7 @@ local fireShot = remotes.FireShot
 
 local player = game.Players.LocalPlayer
 local character = player.Character or  player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 local camera = workspace.CurrentCamera
 
@@ -39,45 +43,25 @@ local ShootingController : ShootingControllerImpl = {
 	ShootEvent = script.ShootingEvent,
 	Shoot = function(self)
 		if self.Debounces["shoot"] then return end
-		
+
 		self.ShootEvent:Fire()
-		
+		AudioController.playSoundEffect("ShootSFX", 0.5, humanoidRootPart, true)
+
 		self.Debounces["shoot"] = true
 		task.delay(SHOT_COOLDOWN, function()
 			self.Debounces["shoot"] = nil
 		end)
-		
+
 		local unitRay = camera:ViewportPointToRay(
 			camera.ViewportSize.X / 2,
 			camera.ViewportSize.Y / 2
 		)
-		local hitSomething : RaycastResult, playerHit : Player = fireShot:InvokeServer(unitRay.Origin, unitRay.Direction)
+		local shotResults = fireShot:InvokeServer(unitRay.Origin, unitRay.Direction)
 		
-		if GameSettings.debug then
-			gizmo.setColor3(Color3.new(1, 0, 0))
-			
-			task.spawn(function()
-				local start = os.clock()
-				local conn : RBXScriptConnection = nil
-				
-				conn = RunService.RenderStepped:Connect(function()
-					if os.clock() > start + SHOT_LIFETIME then
-						conn:Disconnect()
-					end
-					gizmo.drawRay(unitRay.Origin, unitRay.Direction * SHOT_RANGE)
-				end)
-			end)
-		end
-		
-		AudioController.playSoundEffect("ShootSFX", 0.5, humanoidRootPart, true)
-		
-		if hitSomething then
-			if playerHit then
-				if GameSettings.debug then gizmo.setColor3(Color3.new(0.282353, 1, 0.0196078)) end
-				CreateTracer(unitRay.Origin, unitRay.Origin + (unitRay.Direction * hitSomething.Distance), player)
-			end
+		if shotResults then
+			CreateTracer(unitRay.Origin, unitRay.Direction * shotResults.Distance, player)
 		else
-			CreateTracer(unitRay.Origin, unitRay.Origin + (unitRay.Direction * GameSettings.shotDistance), player)
+			CreateTracer(unitRay.Origin, unitRay.Direction * SHOT_RANGE, player)
 		end
 	end,
 }
@@ -90,7 +74,14 @@ end, false, Enum.UserInputType.MouseButton1)
 
 player.CharacterAdded:Connect(function(newCharacter)
 	character = newCharacter
+	humanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
 	params:AddToFilter(newCharacter)
+end)
+
+workspace.ShotTracers.DescendantAdded:Connect(function(desc)
+	if desc:GetAttribute("Owner") == player.Name then
+		desc:Destroy()
+	end
 end)
 
 return ShootingController
