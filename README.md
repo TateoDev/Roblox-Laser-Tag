@@ -1,5 +1,6 @@
 # Roblox Laser Tag
 A simple laser tag game made in Roblox Studio using LuaU.
+As Im working on it, it may break
 
 The code provided on GitHub is for reference only and does not represent the full project.  
 If you want to actually implement any code in this game, please use the **RBLX place file**, which includes all the necessary modules that are not found here.
