@@ -19,20 +19,20 @@ local ShootingService : ShootingServiceImpl = {
 		local params = RaycastParams.new()
 		params.FilterType = Enum.RaycastFilterType.Exclude
 		params:AddToFilter(shotOwner.Character or shotOwner.CharacterAdded:Wait())
-		
+
 		local extendedShot = workspace:Raycast(unitOrigin, unitDirection * GameSettings.shotDistance, params)
 		if extendedShot then
+			CreateTracer(unitOrigin, unitOrigin + (unitDirection * extendedShot.Distance), shotOwner)
+
 			local playerShot = Players:GetPlayerFromCharacter(extendedShot.Instance.Parent)
 			if not playerShot then return extendedShot, nil end
-			
+
 			local character = extendedShot.Instance.Parent
 			local humanoid = character:FindFirstChild("Humanoid") :: Humanoid
 			if not humanoid then return extendedShot, nil end
-			
+
 			humanoid:TakeDamage(50)
-			
-			CreateTracer(unitOrigin, unitOrigin + (unitDirection * extendedShot.Distance), shotOwner)
-			
+						
 			return extendedShot, playerShot
 		else
 			CreateTracer(unitOrigin, unitOrigin + (unitDirection * GameSettings.shotDistance), shotOwner)
@@ -41,8 +41,16 @@ local ShootingService : ShootingServiceImpl = {
 	end,
 }
 
-fireFunction.OnServerInvoke = function(player, unitOrigin, unitDirection)
-	ShootingService.fireShot(player, unitOrigin, unitDirection)
+fireFunction.OnServerInvoke = function(player, unitOrigin, unitDirection) : {}?
+	local shotResults, playerHit = ShootingService.fireShot(player, unitOrigin, unitDirection)
+	if shotResults then
+		return {
+			Distance = shotResults.Distance,
+			PlayerHit = playerHit,
+		}
+	else
+		return nil
+	end
 end
 
 
