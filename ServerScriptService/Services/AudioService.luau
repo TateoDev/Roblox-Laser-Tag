@@ -22,7 +22,9 @@ local AudioService : AudioServiceImpl = {
 }
 
 playSound.OnServerEvent:Connect(function(player, soundName : string, volume : number, parent : Instance?)
-	AudioService.playSoundEffect(soundName, volume, parent)
+	if typeof(soundName) ~= "string" then return end
+	
+	AudioService.playSoundEffect(soundName, math.clamp(volume, 0, 2), parent)
 end)
 
 return AudioService
