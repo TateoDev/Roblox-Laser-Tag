@@ -69,6 +69,8 @@ local ShootingController : ShootingControllerImpl = {
 			end)
 		end
 		
+		AudioController.playSoundEffect("ShootSFX", 0.5, humanoidRootPart, true)
+		
 		if hitSomething then
 			if playerHit then
 				if GameSettings.debug then gizmo.setColor3(Color3.new(0.282353, 1, 0.0196078)) end
