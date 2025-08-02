@@ -60,6 +60,9 @@ ContextActionService:BindAction("KeyboardInputs", handlePressedKeys, false, Enum
 local function dash(actionName, inputState, input : InputObject)
 	if inputState ~= Enum.UserInputState.Begin or not canDash then return end
 	canDash = false
+	
+	AudioController.playSoundEffect("DashSFX", 0.5, humanoidRootPart, false)
+
 	local dashVelocity = Instance.new("LinearVelocity")
 	dashVelocity.Parent = humanoidRootPart
 	local attachment = Instance.new("Attachment")
