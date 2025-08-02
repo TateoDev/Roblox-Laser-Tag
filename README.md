@@ -18,4 +18,5 @@ If you want to actually implement any code in this game, please use the **RBLX p
 -  Headshot detection  
 - Full round and map system  
 -  Main menu and lobby  
--  music  
+-  Music
+-  UI
