@@ -12,9 +12,10 @@ If you want to actually implement any code in this game, please use the **RBLX p
 -  Laser shot tracers
 -  Dynamic viewmodels using springs
 -  Module based code, using a controller (client) service (server) model
+-  Sound effects
 
 ## Upcoming Features
 -  Headshot detection  
 - Full round and map system  
 -  Main menu and lobby  
--  Sound effects and music  
+-  music  
