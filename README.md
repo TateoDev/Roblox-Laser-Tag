@@ -21,3 +21,4 @@ If you want to actually implement any code in this game, please use the **RBLX p
 -  Main menu and lobby  
 -  Music
 -  UI
+-  being an actual game
