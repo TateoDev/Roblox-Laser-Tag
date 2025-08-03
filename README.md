@@ -13,6 +13,7 @@ If you want to actually implement any code in this game, please use the **RBLX p
 -  Laser shot tracers
 -  Dynamic viewmodels using springs
 -  Module based code, using a controller (client) service (server) model
+-  Programmed almost entirely using strict typing
 -  Sound effects
 
 ## Upcoming Features
