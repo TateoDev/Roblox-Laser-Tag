@@ -45,7 +45,6 @@ local ShootingController : ShootingControllerImpl = {
 		if self.Debounces["shoot"] then return end
 
 		self.ShootEvent:Fire()
-		AudioController.playSoundEffect("ShootSFX", 0.5, humanoidRootPart, true)
 
 		self.Debounces["shoot"] = true
 		task.delay(SHOT_COOLDOWN, function()
@@ -57,12 +56,6 @@ local ShootingController : ShootingControllerImpl = {
 			camera.ViewportSize.Y / 2
 		)
 		local shotResults = fireShot:InvokeServer(unitRay.Origin, unitRay.Direction)
-		
-		if shotResults then
-			CreateTracer(unitRay.Origin, unitRay.Direction * shotResults.Distance, player)
-		else
-			CreateTracer(unitRay.Origin, unitRay.Direction * SHOT_RANGE, player)
-		end
 	end,
 }
 
@@ -78,10 +71,5 @@ player.CharacterAdded:Connect(function(newCharacter)
 	params:AddToFilter(newCharacter)
 end)
 
-workspace.ShotTracers.DescendantAdded:Connect(function(desc)
-	if desc:GetAttribute("Owner") == player.Name then
-		desc:Destroy()
-	end
-end)
 
 return ShootingController
