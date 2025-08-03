@@ -14,6 +14,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ContextActionService = game:GetService("ContextActionService")
 local Debris = game:GetService("Debris")
 
+local controllers = ReplicatedStorage:WaitForChild("Controllers")
+local AudioController = require(controllers.AudioController)
+
 local Spring = require(ReplicatedStorage.Util.Spring)
 
 local DASH_SPEED = 100
@@ -62,7 +65,7 @@ local function dash(actionName, inputState, input : InputObject)
 	canDash = false
 	
 	AudioController.playSoundEffect("DashSFX", 0.5, humanoidRootPart, false)
-
+	
 	local dashVelocity = Instance.new("LinearVelocity")
 	dashVelocity.Parent = humanoidRootPart
 	local attachment = Instance.new("Attachment")
