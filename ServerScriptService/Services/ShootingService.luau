@@ -2,6 +2,10 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+local services = ServerScriptService:WaitForChild("Services")
+local AudioService = require(services.AudioService)
 
 local util = ReplicatedStorage:WaitForChild("Util")
 local GameSettings = require(util.GameSettings)
@@ -19,11 +23,12 @@ local ShootingService : ShootingServiceImpl = {
 		local params = RaycastParams.new()
 		params.FilterType = Enum.RaycastFilterType.Exclude
 		params:AddToFilter(shotOwner.Character or shotOwner.CharacterAdded:Wait())
-
+		
 		local extendedShot = workspace:Raycast(unitOrigin, unitDirection * GameSettings.shotDistance, params)
 		if extendedShot then
-			CreateTracer(unitOrigin, unitOrigin + (unitDirection * extendedShot.Distance), shotOwner)
-
+			local tracer = CreateTracer(unitOrigin, unitOrigin + (unitDirection * extendedShot.Distance), shotOwner)
+			AudioService.playSoundEffect("ShootSFX", 2, tracer)
+			
 			local playerShot = Players:GetPlayerFromCharacter(extendedShot.Instance.Parent)
 			if not playerShot then return extendedShot, nil end
 
@@ -35,7 +40,8 @@ local ShootingService : ShootingServiceImpl = {
 						
 			return extendedShot, playerShot
 		else
-			CreateTracer(unitOrigin, unitOrigin + (unitDirection * GameSettings.shotDistance), shotOwner)
+			local tracer = CreateTracer(unitOrigin, unitOrigin + (unitDirection * GameSettings.shotDistance), shotOwner)
+			AudioService.playSoundEffect("WhiffSFX", 2, tracer)
 			return nil, nil
 		end
 	end,
