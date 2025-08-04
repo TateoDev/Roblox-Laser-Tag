@@ -4,6 +4,7 @@ local UserInputService = game:GetService("UserInputService")
 local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local Teams = game:GetService("Teams")
 
 local controllers = ReplicatedStorage:WaitForChild("Controllers")
 local AudioController = require(controllers.AudioController)
@@ -20,9 +21,8 @@ type ShootingControllerImpl = {
 	Shoot : (self : ShootingControllerImpl) -> ()
 }
 
-local SHOT_COOLDOWN = 0.2
-local SHOT_RANGE = 400
-local SHOT_LIFETIME = SHOT_COOLDOWN
+local SHOT_COOLDOWN = GameSettings.shotCooldown
+local SHOT_RANGE = GameSettings.shotDistance
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local fireShot = remotes.FireShot
@@ -43,14 +43,14 @@ local ShootingController : ShootingControllerImpl = {
 	ShootEvent = script.ShootingEvent,
 	Shoot = function(self)
 		if self.Debounces["shoot"] then return end
-
+		
 		self.ShootEvent:Fire()
-
+		
 		self.Debounces["shoot"] = true
 		task.delay(SHOT_COOLDOWN, function()
 			self.Debounces["shoot"] = nil
 		end)
-
+		
 		local unitRay = camera:ViewportPointToRay(
 			camera.ViewportSize.X / 2,
 			camera.ViewportSize.Y / 2
@@ -59,16 +59,20 @@ local ShootingController : ShootingControllerImpl = {
 	end,
 }
 
-ContextActionService:BindAction("shoot", function(actionName, inputState, inputObject)
-	if inputState == Enum.UserInputState.Begin then
-		ShootingController:Shoot()
-	end
-end, false, Enum.UserInputType.MouseButton1)
 
 player.CharacterAdded:Connect(function(newCharacter)
 	character = newCharacter
 	humanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
 	params:AddToFilter(newCharacter)
+	ContextActionService:UnbindAction("shoot")
+	
+	if player.Team ~= Teams.Lobby then
+		ContextActionService:BindAction("shoot", function(actionName, inputState, inputObject)
+			if inputState == Enum.UserInputState.Begin then
+				ShootingController:Shoot()
+			end
+		end, false, Enum.UserInputType.MouseButton1)
+	end
 end)
 
 
