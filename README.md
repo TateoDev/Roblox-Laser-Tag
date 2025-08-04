@@ -15,11 +15,11 @@ If you want to actually implement any code in this game, please use the **RBLX p
 -  Module based code, using a controller (client) service (server) model
 -  Programmed almost entirely using strict typing
 -  Sound effects
+-  Round system
+-  Simple UI
 
-## Upcoming Features
--  Headshot detection  
-- Full round and map system  
+## Upcoming Features  
+-  map system  
 -  Main menu and lobby  
 -  Music
--  UI
 -  being an actual game
