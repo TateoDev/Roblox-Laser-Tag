@@ -35,8 +35,10 @@ local ShootingService : ShootingServiceImpl = {
 			local character = extendedShot.Instance.Parent
 			local humanoid = character:FindFirstChild("Humanoid") :: Humanoid
 			if not humanoid then return extendedShot, nil end
-
-			humanoid:TakeDamage(50)
+			
+			if shotOwner.Team ~= playerShot.Team then
+				humanoid:TakeDamage(50)
+			end
 						
 			return extendedShot, playerShot
 		else
