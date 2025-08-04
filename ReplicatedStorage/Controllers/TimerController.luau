@@ -3,6 +3,7 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Teams = game:GetService("Teams")
 
 local util = ReplicatedStorage:WaitForChild("Util")
 local formatSeconds = require(util.FormatSeconds)
@@ -18,6 +19,9 @@ local playerGui = player:FindFirstChildWhichIsA("PlayerGui")
 local timerGui = script.TimerGui
 local textLabel = timerGui.Frame.TextLabel
 local shadow = timerGui.Frame.Shadow
+local redScore = timerGui.Frame.RedScore
+local blueScore = timerGui.Frame.BlueScore
+
 timerGui.Parent = playerGui
 
 local function tweenUIScale(instance : UIScale, scale : number)
@@ -43,6 +47,17 @@ local TimerController : TimerControllerImpl = {
 		end
 	end,
 }
+
+redScore.Text = `{Teams.Red:GetAttribute("Score")}`
+blueScore.Text = `{Teams.Blue:GetAttribute("Score")}`
+
+Teams.Red:GetAttributeChangedSignal("Score"):Connect(function()
+	redScore.Text = `{Teams.Red:GetAttribute("Score")}`
+end)
+
+Teams.Blue:GetAttributeChangedSignal("Score"):Connect(function()
+	blueScore.Text = `{Teams.Blue:GetAttribute("Score")}`
+end)
 
 ReplicaClient.OnNew("GameData", function(replica)
 	replica:OnSet({"Timer"}, function(newValue, oldValue)
