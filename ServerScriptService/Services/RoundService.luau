@@ -32,6 +32,9 @@ gameDataReplica:Replicate()
 
 local RoundService : RoundServiceImpl = {
 	assignTeams = function()
+		Teams.Red:SetAttribute("Score", 0)
+		Teams.Blue:SetAttribute("Score", 0)
+		
 		local playersInLobby = Teams.Lobby:GetPlayers()
 		Random.new():Shuffle(playersInLobby)
 		for index, player in playersInLobby do
