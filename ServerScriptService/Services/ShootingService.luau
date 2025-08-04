@@ -37,7 +37,7 @@ local ShootingService : ShootingServiceImpl = {
 			if not humanoid then return extendedShot, nil end
 			
 			if shotOwner.Team ~= playerShot.Team then
-				humanoid:TakeDamage(50)
+				humanoid:TakeDamage(GameSettings.shotDamage)
 			end
 						
 			return extendedShot, playerShot
