@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local Teams = game:GetService("Teams")
 
 local Spring = require(ReplicatedStorage.Util.Spring)
 
@@ -12,7 +13,7 @@ local ShootingController = require(controllers.ShootingController)
 
 type ViewModelControllerImpl = {
 	currentViewModel : Model?;
-	changeViewModel : (self : ViewModelControllerImpl, model : Model) -> ();
+	changeViewModel : (self : ViewModelControllerImpl, model : Model?) -> ();
 	_updateViewModel : (self : ViewModelControllerImpl) -> ();
 }
 
@@ -41,9 +42,11 @@ local ViewModelController : ViewModelControllerImpl = {
 		if self.currentViewModel then
 			self.currentViewModel:Destroy()
 		end
-		self.currentViewModel = model:Clone() 
-		if self.currentViewModel then
-			self.currentViewModel.Parent = camera
+		if model then
+			self.currentViewModel = model:Clone() 
+			if self.currentViewModel then
+				self.currentViewModel.Parent = camera
+			end
 		end
 	end,
 	_updateViewModel = function(self)
@@ -53,12 +56,14 @@ local ViewModelController : ViewModelControllerImpl = {
 		modelSpring.Target = cameraCFrame.Position + (cameraCFrame.RightVector * MODEL_OFFSET.X) + (cameraCFrame.UpVector * MODEL_OFFSET.Y) + (cameraCFrame.LookVector * MODEL_OFFSET.Z)
 		
 		self.currentViewModel:PivotTo(
-			CFrame.new(modelSpring.Position) * CFrame.Angles(cameraCFrame:ToEulerAnglesXYZ()) * CFrame.Angles(modelRotationSpring.Position.X, modelRotationSpring.Position.Y, modelRotationSpring.Position.Z)
+			CFrame.new(Vector3.new(
+				modelSpring.Position.X,
+				modelSpring.Position.Y,
+				modelSpring.Position.Z
+				)) * CFrame.Angles(cameraCFrame:ToEulerAnglesXYZ()) * CFrame.Angles(modelRotationSpring.Position.X, modelRotationSpring.Position.Y, modelRotationSpring.Position.Z)
 		)
 	end,
 }
-
-ViewModelController:changeViewModel(viewModels.Part)
 
 RunService:BindToRenderStep("ViewModel", Enum.RenderPriority.Character.Value, function()
 	ViewModelController:_updateViewModel()
@@ -71,6 +76,11 @@ end)
 player.CharacterAdded:Connect(function(newCharacter)
 	character = newCharacter
 	humanoid = newCharacter:WaitForChild("Humanoid")
+	if player.Team == Teams.Lobby then
+		ViewModelController:changeViewModel(nil)
+	else
+		ViewModelController:changeViewModel(viewModels.Part)
+	end
 end)
 
 return ViewModelController
