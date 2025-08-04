@@ -65,7 +65,7 @@ event.OnServerEvent:Connect(function(player, pitchAngle)
 
 	-- Apply pitch directly (no smoothing here; smoothing could be added server-side if needed)
 	local pitchCFrame = CFrame.Angles(pitchAngle, 0, 0)
-	waist.C0 = originalC0 * pitchCFrame
+	waist.C0 = waist.C0:Lerp(originalC0 * pitchCFrame, 0.6)
 end)
 
 return nil
