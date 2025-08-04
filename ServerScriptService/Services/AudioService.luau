@@ -1,4 +1,5 @@
 --!strict
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 type AudioServiceImpl = {
@@ -15,9 +16,13 @@ local AudioService : AudioServiceImpl = {
 	playSoundEffect = function(soundName, volume, parent)
 		local soundToPlay = soundEffectFolder:FindFirstChild(soundName):Clone() :: Sound
 		if not soundToPlay then error(`sound {soundName} not found`) end
-		soundToPlay.Parent = parent or workspace
-		soundToPlay.PlayOnRemove = true
-		soundToPlay:Destroy()
+		soundToPlay.Parent = parent
+		task.spawn(function()
+			soundToPlay:Play()
+			soundToPlay.Ended:Connect(function()
+				soundToPlay:Destroy()
+			end)
+		end)
 	end,
 }
 
