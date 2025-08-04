@@ -79,7 +79,7 @@ player.CharacterAdded:Connect(function(newCharacter)
 	if player.Team == Teams.Lobby then
 		ViewModelController:changeViewModel(nil)
 	else
-		ViewModelController:changeViewModel(viewModels.Part)
+		ViewModelController:changeViewModel(viewModels:FindFirstChild(player.Team.Name))
 	end
 end)
 
