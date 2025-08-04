@@ -1,7 +1,7 @@
 --[[
-I'm gonna be honest here, I write most of my code, but this is almost straight ChatGPT
+I'm gonna be honest here, I try write most of my code on my own, but this is almost straight ChatGPT
 
-The code is kinda ugly, but it works. I'll clean it up once I finished everything else up, but thats not a priority
+The code is kinda ugly, but it works. I'll clean it up once I finished everything else up
 ]]--
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -9,6 +9,8 @@ local Players = game:GetService("Players")
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local event = remotes.UpdateTorsoRotation
+
+local assets = ReplicatedStorage:WaitForChild("Assets")
 
 -- Allowed pitch range to prevent extreme values (e.g., +/- 60 degrees)
 local MAX_PITCH = math.rad(30)
@@ -20,16 +22,23 @@ local function onCharacterAdded(player, character)
 	local upperTorso = character:WaitForChild("UpperTorso")
 	local waist = upperTorso:WaitForChild("Waist") :: Motor6D
 	originalC0s[player] = waist.C0
-
+	
 	-- Clean up when character is removed
 	character:WaitForChild("Humanoid").Died:Connect(function()
 		originalC0s[player] = nil
 	end)
+	
 end
 
 Players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(function(char)
 		onCharacterAdded(player, char)
+		
+		local highlight = assets.PlayerHighlight:Clone()
+		highlight.OutlineColor = player.TeamColor.Color
+		highlight.FillColor = player.TeamColor.Color
+		
+		highlight.Parent = char
 	end)
 	if player.Character then
 		onCharacterAdded(player, player.Character)
