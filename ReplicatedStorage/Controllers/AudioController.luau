@@ -1,71 +1,84 @@
 --!strict
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local ServerScriptService = game:GetService("ServerScriptService")
 
-type AudioControllerImpl = {
-	musicLayers : {[number] : Sound | number};
+local services = ServerScriptService:WaitForChild("Services")
+local AudioService = require(services.AudioService)
 
-	playSoundEffect: (soundName : string, volume : number, parent : Instance?, global : boolean?) -> ();
-	setMusicAtLayer: (self : AudioControllerImpl, music : string, layer : number) -> ();
-	stopMusicAtLayer: (self : AudioControllerImpl, layer : number) -> ();
+local util = ReplicatedStorage:WaitForChild("Util")
+local GameSettings = require(util.GameSettings)
+local CreateTracer = require(ReplicatedStorage.Util.CreateTracer)
+
+type ShootingServiceImpl = {
+	fireShot : (shotOwner : Player, unitOrigin : Vector3, unitDirection : Vector3) -> (RaycastResult?, Player?)
 }
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
-local playSound = remotes.PlaySound
+local fireFunction = remotes.FireShot
 
-local musicFolder = ReplicatedStorage.Assets.Music
-local soundEffectFolder = ReplicatedStorage.Assets.SoundEffects
+local ShootingService : ShootingServiceImpl = {
+	fireShot = function(shotOwner, unitOrigin, unitDirection)
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		params:AddToFilter(shotOwner.Character or shotOwner.CharacterAdded:Wait())
+		
+		local extendedShot = workspace:Raycast(unitOrigin, unitDirection * GameSettings.shotDistance, params)
+		if extendedShot then
+			local tracer = CreateTracer(unitOrigin, unitOrigin + (unitDirection * extendedShot.Distance), shotOwner)
+			AudioService.playSoundEffect("ShootSFX", 2, tracer)
+			
+			local playerShot = Players:GetPlayerFromCharacter(extendedShot.Instance.Parent)
+			if not playerShot then return extendedShot, nil end
 
-local AudioController : AudioControllerImpl = {
-	musicLayers = {},
-	playSoundEffect = function(soundName, volume, parent, global)
-		if global then
-			playSound:FireServer(soundName, volume, parent)
+			local character = extendedShot.Instance.Parent
+			local humanoid = character:FindFirstChild("Humanoid") :: Humanoid
+			if not humanoid then return extendedShot, nil end
+			
+			if shotOwner.Team ~= playerShot.Team then
+				if extendedShot.Instance.Name == "Head" then
+					humanoid:TakeDamage(1000)
+				else
+					humanoid:TakeDamage(GameSettings.shotDamage)
+				end
+				
+				if humanoid.Health <= 0 then
+					if not shotOwner.Team then return end
+					shotOwner.Team:SetAttribute("Score", shotOwner.Team:GetAttribute("Score") + 1)
+				end
+			end
+						
+			return extendedShot, playerShot
 		else
-			task.spawn(function()
-				local sound = soundEffectFolder:FindFirstChild(soundName):Clone() :: Sound
-				if not sound then error(`Sound {soundName} not found`) end
-				sound.Parent = parent or workspace
-				sound.Volume = volume
-				sound.PlayOnRemove = true
-				sound:Destroy()
-			end)
-		end
-	end,
-  
-	setMusicAtLayer = function(self, music, layer)
-		local musicToPlay : Sound = musicFolder[music]
-		if not musicToPlay then return end
-		self.musicLayers[layer] = musicToPlay
-
-		local maxLayer = 0
-
-		for k in pairs(self.musicLayers) do
-			if type(k) == "number" and k > maxLayer and self.musicLayers[k] ~= 0 then
-				maxLayer = k
-			end
-		end
-
-		if layer == maxLayer then
-			for _, sound : Sound in musicFolder:GetChildren() do
-				sound:Stop()
-			end
-			musicToPlay:Play()
-		end
-	end,
-  
-	stopMusicAtLayer = function(self, layer)
-		if not self.musicLayers[layer] then return end
-		musicFolder[self.musicLayers[layer]]:Stop()
-		self.musicLayers[layer] = 0
-		for i = #self.musicLayers, 1, -1 do
-			if typeof(self.musicLayers[i]) ~= "string" then continue end
-			if musicFolder[self.musicLayers[i]] then
-				musicFolder[self.musicLayers[i]]:Play()
-				break
-			end
+			local tracer = CreateTracer(unitOrigin, unitOrigin + (unitDirection * GameSettings.shotDistance), shotOwner)
+			AudioService.playSoundEffect("WhiffSFX", 2, tracer)
+			return nil, nil
 		end
 	end,
 }
 
+fireFunction.OnServerInvoke = function(player, unitOrigin, unitDirection) : {}?
+	local shotResults, playerHit = ShootingService.fireShot(player, unitOrigin, unitDirection)
+	if shotResults then
+		return {
+			Distance = shotResults.Distance,
+			PlayerHit = playerHit,
+		}
+	else
+		return nil
+	end
+end
 
-return AudioController
+
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(character)
+		for _, child in character:GetChildren() do
+			if child:IsA("Accessory") then
+				child:FindFirstChildWhichIsA("MeshPart").CanQuery = false
+			end
+		end
+	end)
+end)
+
+return ShootingService
