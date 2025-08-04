@@ -13,7 +13,7 @@ local ShootingController = require(controllers.ShootingController)
 
 type ViewModelControllerImpl = {
 	currentViewModel : Model?;
-	changeViewModel : (self : ViewModelControllerImpl, model : Model?) -> ();a
+	changeViewModel : (self : ViewModelControllerImpl, model : Model?) -> ();
 	_updateViewModel : (self : ViewModelControllerImpl) -> ();
 }
 
