@@ -24,6 +24,7 @@ return function(from : Vector3, to : Vector3, owner : Player)
 	tracer.Size = Vector3.new(0.2, 0.2, distance)
 	tracer.CFrame = orientation * CFrame.new(0,0, -distance * 0.5)
 	tracer.Parent = workspace.ShotTracers
+	tracer.BrickColor = owner.TeamColor
 	tracer.Name = HttpService:GenerateGUID(false)
 	
 	if RunService:IsServer() then
