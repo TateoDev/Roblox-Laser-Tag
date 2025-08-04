@@ -37,7 +37,16 @@ local ShootingService : ShootingServiceImpl = {
 			if not humanoid then return extendedShot, nil end
 			
 			if shotOwner.Team ~= playerShot.Team then
-				humanoid:TakeDamage(GameSettings.shotDamage)
+				if extendedShot.Instance.Name == "Head" then
+					humanoid:TakeDamage(1000)
+				else
+					humanoid:TakeDamage(GameSettings.shotDamage)
+				end
+				
+				if humanoid.Health <= 0 then
+					if not shotOwner.Team then return end
+					shotOwner.Team:SetAttribute("Score", shotOwner.Team:GetAttribute("Score") + 1)
+				end
 			end
 						
 			return extendedShot, playerShot
